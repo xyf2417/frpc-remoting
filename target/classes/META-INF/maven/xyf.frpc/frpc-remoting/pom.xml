@@ -4,4 +4,19 @@
   <artifactId>frpc-remoting</artifactId>
   <version>0.0.1</version>
   <build/>
+  <dependencies>
+  	<!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+	<dependency>
+	    <groupId>io.netty</groupId>
+	    <artifactId>netty-all</artifactId>
+	    <version>4.1.24.Final</version>
+	</dependency>
+  	<!-- https://mvnrepository.com/artifact/org.msgpack/msgpack -->
+	<dependency>
+	    <groupId>org.msgpack</groupId>
+	    <artifactId>msgpack</artifactId>
+	    <version>0.6.12</version>
+	</dependency>
+  	
+  </dependencies>
 </project>

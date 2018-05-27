@@ -20,21 +20,21 @@ public class NettyCodecByteBuf {
 	}
 	
 	/**
-	 * 将数组里的数据左移，便于处理
+	 * 
 	 */
-	private void adjust()
+	private void adjust(int start)
 	{
 		if(currentSize == buf.length || currentSize == 0)
 		{
 			return;
 		}
-		System.arraycopy(buf, currentSize - 1, buf, 0, currentSize);
+		System.arraycopy(buf, start, buf, 0, currentSize);
 	}
 	
 	public void write(byte [] bytes) {
 		capacityCheck(bytes.length);
-		adjust();
 		System.arraycopy(bytes, 0, buf, currentSize, bytes.length);
+		currentSize += bytes.length;
 	}
 	
 	private void capacityCheck(int toWriteLength) {
@@ -43,8 +43,12 @@ public class NettyCodecByteBuf {
 		}
 	}
 	
+	public boolean canWrite(int length) {
+		return buf.length - currentSize - length >= 0;
+	}
+	
 	/**
-	 * 获取当前数组中可读字节个数
+	 * 
 	 * @return
 	 */
 	public int size() {
@@ -63,7 +67,7 @@ public class NettyCodecByteBuf {
 		
 		currentSize = currentSize - length;
 		
-		adjust();
+		adjust(length);
 		
 		return result;
 		
