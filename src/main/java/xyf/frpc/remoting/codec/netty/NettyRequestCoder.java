@@ -5,6 +5,8 @@ import java.io.IOException;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
+import xyf.frpc.config.Application;
+import xyf.frpc.config.Provider;
 import xyf.frpc.remoting.codec.Decoder;
 import xyf.frpc.remoting.codec.Encoder;
 import xyf.frpc.remoting.data.Head;
@@ -12,6 +14,10 @@ import xyf.frpc.remoting.data.Request;
 import xyf.frpc.remoting.data.RequestBody;
 import xyf.frpc.remoting.data.Response;
 import xyf.frpc.remoting.data.ResponseBody;
+import xyf.frpc.rpc.Invocation;
+import xyf.frpc.rpc.Invoker;
+import xyf.frpc.rpc.MethodInvocation;
+import xyf.frpc.rpc.Result;
 
 public class NettyRequestCoder implements Decoder, Encoder {
 	
@@ -73,7 +79,17 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				}
 				
 				toReadHead = true;
-				System.out.println(currentRequest);
+				Application application = Application.getApplication();
+				
+				Invoker invoker = application.resolveInovoker(currentRequest.getBody().getInterfaceFullName());
+				
+				Invocation invocation = new MethodInvocation();
+				invocation.setMethodName(currentRequest.getBody().getMethodName());
+				invocation.setArguments(currentRequest.getBody().getArguments());
+				invocation.setParameterTypes(currentRequest.getBody().getParameterTypes());
+				
+
+				Result result = invoker.invoke(invocation);
 
 				
 				ByteBuf outmsg = null;
@@ -83,6 +99,7 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				
 				
 				ResponseBody body = new ResponseBody();
+				body.setReturnValue(result);
 				
 				body.setReturnValue(currentRequest.getBody().toString());
 				byte[] bodyBytes = null;
