@@ -1,5 +1,8 @@
 package xyf.frpc.remoting.server.netty;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -13,10 +16,10 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import xyf.frpc.remoting.codec.netty.NettyRequestCoder;
 import xyf.frpc.remoting.server.ProviderServer;
 
-public class NettyPrividerServer implements ProviderServer {
-
+public class NettyProviderServer implements ProviderServer {
+	private Log logger = LogFactory.getLog(getClass());
 	public void bind(int port) throws InterruptedException {
-		
+		logger.info("frpc:" + " start server bingding");
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		
@@ -27,6 +30,8 @@ public class NettyPrividerServer implements ProviderServer {
 			.option(ChannelOption.SO_BACKLOG, 1024)
 			.childHandler(new ChildChannelHandler());
 			ChannelFuture f = b.bind(port).sync();
+			
+			logger.info("frpc:" + " server is listenring at " + port);
 			f.channel().closeFuture().sync();
 		} finally {
 			bossGroup.shutdownGracefully();

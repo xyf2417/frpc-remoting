@@ -16,4 +16,13 @@ public class Response {
 	public void setBody(ResponseBody body) {
 		this.body = body;
 	}
+	
+	public String toString() {
+		StringBuilder res = new StringBuilder();
+		res.append("Response(");
+		res.append(body.getReturnValue());
+		res.append(")");
+		
+		return res.toString();
+	}
 }

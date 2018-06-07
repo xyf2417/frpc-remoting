@@ -1,6 +1,7 @@
 package xyf.frpc.remoting.codec.netty;
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -84,9 +85,17 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				Invoker invoker = application.resolveInovoker(currentRequest.getBody().getInterfaceFullName());
 				
 				Invocation invocation = new MethodInvocation();
+				invocation.setInterfaceFullName(currentRequest.getBody().getInterfaceFullName());
 				invocation.setMethodName(currentRequest.getBody().getMethodName());
 				invocation.setArguments(currentRequest.getBody().getArguments());
 				invocation.setParameterTypes(currentRequest.getBody().getParameterTypes());
+				
+				System.out.println("-------------nettyRequestcoder:" + invocation);
+				System.out.println("-----NettyRequestCoder: " + invocation.getInterfaceFullName());
+				System.out.println("-----NettyRequestCoder: " + invocation.getMethodName());
+				System.out.println("-----NettyRequestCoder: " + Arrays.toString(invocation.getArguments()));
+				System.out.println("-----NettyRequestCoder: " + Arrays.toString(invocation.getParameterTypes()));
+				System.out.println("-------------nettyRequestcoder:" + invocation);
 				
 
 				Result result = invoker.invoke(invocation);
@@ -101,7 +110,6 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				ResponseBody body = new ResponseBody();
 				body.setReturnValue(result);
 				
-				body.setReturnValue(currentRequest.getBody().toString());
 				byte[] bodyBytes = null;
 				try {
 					bodyBytes = JavaSerializableReqRespBodyPack.toArray(body);
