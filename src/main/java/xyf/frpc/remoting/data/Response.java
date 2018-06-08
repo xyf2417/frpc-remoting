@@ -20,7 +20,7 @@ public class Response {
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		res.append("Response(");
-		res.append(body.getReturnValue());
+		res.append(body);
 		res.append(")");
 		
 		return res.toString();

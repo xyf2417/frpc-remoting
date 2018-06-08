@@ -19,6 +19,9 @@ public class ResponseBody implements Serializable{
 		this.returnValue = returnValue;
 	}
 	
+	public String toString() {
+		return returnValue.toString();
+	}
 	
 
 }

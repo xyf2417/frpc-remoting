@@ -82,7 +82,6 @@ public class Head {
 		temp = new byte[8];
 		System.arraycopy(bytes, 4, temp, 0, 8);
 		head.setInvokeId(ByteUtil.bytes2long(temp));
-		System.out.println(head.getInvokeId());
 		temp = new byte[4];
 		System.arraycopy(bytes, 12, temp, 0, 4);
 		head.setBodyLength(ByteUtil.bytes2int(temp));

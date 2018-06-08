@@ -15,10 +15,6 @@ public class NettyResponseCoder  implements Decoder, Encoder{
 	
 	private Response currentResponse;
 	
-	
-	/**
-	 * ���ڼ�¼�´�Ҫ��ȡ����ͷ��������Ϣ��
-	 */
 	private boolean toReadHead = true;
 	
 	public Object decode(Object msg, Object out){
@@ -37,9 +33,7 @@ public class NettyResponseCoder  implements Decoder, Encoder{
 		catch(Exception e) {
 			e.printStackTrace();
 		}
-		
-		
-		
+
 		while(true) {
 			if(toReadHead)
 			{
@@ -57,7 +51,6 @@ public class NettyResponseCoder  implements Decoder, Encoder{
 				toReadHead = false;
 			} else {
 				if(buffer.size() < currentResponse.getHead().getBodyLength()) {
-					System.out.println("body break");
 					break;
 				}
 				byte [] bytes = buffer.read(currentResponse.getHead().getBodyLength());
@@ -69,6 +62,7 @@ public class NettyResponseCoder  implements Decoder, Encoder{
 				}
 				
 				toReadHead = true;
+				
 				System.out.println(currentResponse);
 				
 			}

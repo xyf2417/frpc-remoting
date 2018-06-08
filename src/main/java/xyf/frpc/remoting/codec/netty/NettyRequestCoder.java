@@ -19,17 +19,15 @@ import xyf.frpc.rpc.Invocation;
 import xyf.frpc.rpc.Invoker;
 import xyf.frpc.rpc.MethodInvocation;
 import xyf.frpc.rpc.Result;
+import xyf.frpc.rpc.ResultStatus;
+import xyf.frpc.rpc.RpcResult;
 
 public class NettyRequestCoder implements Decoder, Encoder {
 	
 	private NettyCodecByteBuf buffer = new NettyCodecByteBuf();
 	
 	private Request currentRequest;
-	
-	
-	/**
-	 * ���ڼ�¼�´�Ҫ��ȡ����ͷ��������Ϣ��
-	 */
+
 	private boolean toReadHead = true;
 	
 	public Object decode(Object msg, Object out){
@@ -40,7 +38,6 @@ public class NettyRequestCoder implements Decoder, Encoder {
 			buf.readBytes(bytes);
 			ctx = (ChannelHandlerContext)out;
 			if(!buffer.canWrite(bytes.length)) {
-				System.out.println("exception");
 				throw new RuntimeException("buffer overflow when decode");
 			}
 			buffer.write(bytes);
@@ -82,39 +79,41 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				toReadHead = true;
 				Application application = Application.getApplication();
 				
-				Invoker invoker = application.resolveInovoker(currentRequest.getBody().getInterfaceFullName());
-				
-				Invocation invocation = new MethodInvocation();
-				invocation.setInterfaceFullName(currentRequest.getBody().getInterfaceFullName());
-				invocation.setMethodName(currentRequest.getBody().getMethodName());
-				invocation.setArguments(currentRequest.getBody().getArguments());
-				invocation.setParameterTypes(currentRequest.getBody().getParameterTypes());
-				
-				System.out.println("-------------nettyRequestcoder:" + invocation);
-				System.out.println("-----NettyRequestCoder: " + invocation.getInterfaceFullName());
-				System.out.println("-----NettyRequestCoder: " + invocation.getMethodName());
-				System.out.println("-----NettyRequestCoder: " + Arrays.toString(invocation.getArguments()));
-				System.out.println("-----NettyRequestCoder: " + Arrays.toString(invocation.getParameterTypes()));
-				System.out.println("-------------nettyRequestcoder:" + invocation);
-				
-
-				Result result = invoker.invoke(invocation);
-
+				Invoker invoker = application.getInovoker(currentRequest.getBody().getInterfaceFullName());
 				
 				ByteBuf outmsg = null;
+				
+				//Construct the response head
 				Head head = new Head();
 				head.setMagic(Head.MAGIC);
 				head.setInvokeId(currentRequest.getHead().getInvokeId());
 				
-				
 				ResponseBody body = new ResponseBody();
-				body.setReturnValue(result);
+				
+				if(invoker == null) {
+					Result result = new RpcResult();
+					result.setStatus(ResultStatus.ERROR);
+					body.setReturnValue(result);
+					System.out.println("-----NettyRequestCoder can't find the invoke :" + body);
+				} 
+				else {
+					Invocation invocation = new MethodInvocation();
+					invocation.setInterfaceFullName(currentRequest.getBody().getInterfaceFullName());
+					invocation.setMethodName(currentRequest.getBody().getMethodName());
+					invocation.setArguments(currentRequest.getBody().getArguments());
+					invocation.setParameterTypes(currentRequest.getBody().getParameterTypes());
+					
+					Result result = invoker.invoke(invocation);
+
+					//construct the response body
+					body.setReturnValue(result);
+					System.out.println("-----NettyRequestCoder find the invoke :" + body);
+				}
 				
 				byte[] bodyBytes = null;
 				try {
 					bodyBytes = JavaSerializableReqRespBodyPack.toArray(body);
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				head.setBodyLength(bodyBytes.length);
