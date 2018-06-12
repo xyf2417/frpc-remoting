@@ -17,9 +17,12 @@ import xyf.frpc.remoting.codec.netty.NettyRequestCoder;
 import xyf.frpc.remoting.server.ProviderServer;
 
 public class NettyProviderServer implements ProviderServer {
-	private Log logger = LogFactory.getLog(getClass());
-	public void bind(int port) throws InterruptedException {
-		logger.info("frpc:" + " start server bingding");
+	
+	private static final Log logger = LogFactory.getLog(NettyProviderServer.class);
+	
+	public void bind(int port) {
+		
+		logger.info("frpc:" + " start server binding");
 		EventLoopGroup bossGroup = new NioEventLoopGroup();
 		EventLoopGroup workerGroup = new NioEventLoopGroup();
 		
@@ -29,10 +32,10 @@ public class NettyProviderServer implements ProviderServer {
 			.channel(NioServerSocketChannel.class)
 			.option(ChannelOption.SO_BACKLOG, 1024)
 			.childHandler(new ChildChannelHandler());
-			ChannelFuture f = b.bind(port).sync();
+			ChannelFuture f = b.bind(port);
 			
-			logger.info("frpc:" + " server is listenring at " + port);
-			f.channel().closeFuture().sync();
+			logger.info("frpc:" + " server is listerning at " + port);
+			
 		} finally {
 			bossGroup.shutdownGracefully();
 			workerGroup.shutdownGracefully();

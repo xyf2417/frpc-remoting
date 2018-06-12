@@ -77,10 +77,6 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				}
 				
 				toReadHead = true;
-				Application application = Application.getApplication();
-				
-				Invoker invoker = application.getInovoker(currentRequest.getBody().getInterfaceFullName());
-				
 				ByteBuf outmsg = null;
 				
 				//Construct the response head
@@ -89,6 +85,12 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				head.setInvokeId(currentRequest.getHead().getInvokeId());
 				
 				ResponseBody body = new ResponseBody();
+				
+				/*Application application = Application.getApplication();
+				
+				Invoker invoker = application.getInovoker(currentRequest.getBody().getInterfaceFullName());
+				
+				
 				
 				if(invoker == null) {
 					Result result = new RpcResult();
@@ -108,7 +110,7 @@ public class NettyRequestCoder implements Decoder, Encoder {
 					//construct the response body
 					body.setReturnValue(result);
 					System.out.println("-----NettyRequestCoder find the invoke :" + body);
-				}
+				}*/
 				
 				byte[] bodyBytes = null;
 				try {
