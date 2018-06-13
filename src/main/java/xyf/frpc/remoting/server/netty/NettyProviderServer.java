@@ -1,8 +1,5 @@
 package xyf.frpc.remoting.server.netty;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -13,6 +10,10 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import xyf.frpc.remoting.codec.netty.NettyRequestCoder;
 import xyf.frpc.remoting.server.ProviderServer;
 
@@ -20,11 +21,16 @@ public class NettyProviderServer implements ProviderServer {
 	
 	private static final Log logger = LogFactory.getLog(NettyProviderServer.class);
 	
+	private ChannelFuture nettyChannel;
+	
+	private EventLoopGroup bossGroup;
+	private EventLoopGroup workerGroup;
+	
 	public void bind(int port) {
 		
 		logger.info("frpc:" + " start server binding");
-		EventLoopGroup bossGroup = new NioEventLoopGroup();
-		EventLoopGroup workerGroup = new NioEventLoopGroup();
+		bossGroup = new NioEventLoopGroup();
+		workerGroup = new NioEventLoopGroup();
 		
 		try {
 			ServerBootstrap b = new ServerBootstrap();
@@ -32,13 +38,14 @@ public class NettyProviderServer implements ProviderServer {
 			.channel(NioServerSocketChannel.class)
 			.option(ChannelOption.SO_BACKLOG, 1024)
 			.childHandler(new ChildChannelHandler());
-			ChannelFuture f = b.bind(port);
+			nettyChannel = b.bind(port).sync();
 			
 			logger.info("frpc:" + " server is listerning at " + port);
 			
+		} catch (InterruptedException e) {
+			logger.info("frpc:" + " server interrupted, the nested reason is " + e.getMessage());
 		} finally {
-			bossGroup.shutdownGracefully();
-			workerGroup.shutdownGracefully();
+			//no op
 		}
 
 	}

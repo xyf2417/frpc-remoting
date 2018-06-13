@@ -1,8 +1,7 @@
 package xyf.frpc.remoting.config;
 
-import xyf.frpc.config.ProtocolConfig;
-import xyf.frpc.config.Provider;
+import xyf.frpc.rpc.Invoker;
 
 public interface Protocol {
-	public <T> Exporter<T> export(String providerName, ProtocolConfig protocolConfig, Provider provider);
+	public <T> Exporter<T> export(ExportInfo exportInfo, Invoker<?> invoker);
 }

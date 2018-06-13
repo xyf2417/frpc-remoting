@@ -1,23 +1,17 @@
 package xyf.frpc.remoting.codec.netty;
 
-import java.io.IOException;
-import java.util.Arrays;
-
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
-import xyf.frpc.config.Application;
-import xyf.frpc.config.Provider;
+
+import java.io.IOException;
+import java.util.Arrays;
+
 import xyf.frpc.remoting.codec.Decoder;
 import xyf.frpc.remoting.codec.Encoder;
 import xyf.frpc.remoting.data.Head;
 import xyf.frpc.remoting.data.Request;
-import xyf.frpc.remoting.data.RequestBody;
-import xyf.frpc.remoting.data.Response;
 import xyf.frpc.remoting.data.ResponseBody;
-import xyf.frpc.rpc.Invocation;
-import xyf.frpc.rpc.Invoker;
-import xyf.frpc.rpc.MethodInvocation;
 import xyf.frpc.rpc.Result;
 import xyf.frpc.rpc.ResultStatus;
 import xyf.frpc.rpc.RpcResult;
@@ -85,6 +79,11 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				head.setInvokeId(currentRequest.getHead().getInvokeId());
 				
 				ResponseBody body = new ResponseBody();
+				
+				Result result = new RpcResult();
+				result.setStatus(ResultStatus.ERROR);
+				result.setValue("response:" + System.currentTimeMillis() + "---" + currentRequest.getBody().getInterfaceFullName() + "." + currentRequest.getBody().getMethodName() + "(" + Arrays.toString(currentRequest.getBody().getArguments()) + ")");
+				body.setReturnValue(result);
 				
 				/*Application application = Application.getApplication();
 				
