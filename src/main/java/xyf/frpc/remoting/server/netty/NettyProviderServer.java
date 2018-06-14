@@ -15,11 +15,15 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import xyf.frpc.remoting.codec.netty.NettyRequestCoder;
+import xyf.frpc.remoting.handler.ResultHandler;
+import xyf.frpc.remoting.handler.netty.NettyServerHandler;
 import xyf.frpc.remoting.server.ProviderServer;
 
 public class NettyProviderServer implements ProviderServer {
 	
 	private static final Log logger = LogFactory.getLog(NettyProviderServer.class);
+	
+	private ResultHandler resultHandler;
 	
 	private ChannelFuture nettyChannel;
 	
@@ -37,7 +41,8 @@ public class NettyProviderServer implements ProviderServer {
 			b.group(bossGroup, workerGroup)
 			.channel(NioServerSocketChannel.class)
 			.option(ChannelOption.SO_BACKLOG, 1024)
-			.childHandler(new ChildChannelHandler());
+			.childHandler(new ChildChannelHandler(resultHandler));
+			
 			nettyChannel = b.bind(port).sync();
 			
 			logger.info("frpc:" + " server is listerning at " + port);
@@ -50,32 +55,24 @@ public class NettyProviderServer implements ProviderServer {
 
 	}
 
+	public void setResultHandler(ResultHandler resultHandler) {
+		this.resultHandler = resultHandler;
+	}
+
 }
 
 class ChildChannelHandler extends ChannelInitializer<Channel> {
-
+	
+	private ResultHandler resultHandler;
+	
+	public ChildChannelHandler(ResultHandler resultHandler) {
+		this.resultHandler = resultHandler;
+	}
+	
 	@Override
 	protected void initChannel(Channel ch) throws Exception {
-		ch.pipeline().addLast(new TimerServerHandler());
+		ch.pipeline().addLast(new NettyServerHandler(resultHandler));
 	}
 }
 
-class TimerServerHandler extends ChannelInboundHandlerAdapter  {
-	NettyRequestCoder coder= new NettyRequestCoder();
-	@Override
-    public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
-		System.out.println("server channelRead");
-		coder.decode(msg, ctx);
-		ctx.read();
-	}
-	
-	@Override
-	public void channelReadComplete(ChannelHandlerContext ctx) throws Exception {
-		ctx.flush();
-	}
-	
-	@Override 
-	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-		ctx.close();
-	}
-}
+

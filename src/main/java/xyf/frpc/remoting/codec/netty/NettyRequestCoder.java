@@ -11,18 +11,26 @@ import xyf.frpc.remoting.codec.Decoder;
 import xyf.frpc.remoting.codec.Encoder;
 import xyf.frpc.remoting.data.Head;
 import xyf.frpc.remoting.data.Request;
+import xyf.frpc.remoting.data.Response;
 import xyf.frpc.remoting.data.ResponseBody;
+import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.rpc.Result;
 import xyf.frpc.rpc.ResultStatus;
 import xyf.frpc.rpc.RpcResult;
 
 public class NettyRequestCoder implements Decoder, Encoder {
 	
+	private ResultHandler resultHandler;
+	
 	private NettyCodecByteBuf buffer = new NettyCodecByteBuf();
 	
 	private Request currentRequest;
 
 	private boolean toReadHead = true;
+	
+	public NettyRequestCoder(ResultHandler resultHandler) {
+		this.resultHandler = resultHandler;
+	}
 	
 	public Object decode(Object msg, Object out){
 		ChannelHandlerContext ctx = null;
@@ -46,7 +54,6 @@ public class NettyRequestCoder implements Decoder, Encoder {
 			if(toReadHead)
 			{
 				if(buffer.size() < Head.HEAD_LENGTH) {
-					System.out.println("head break");
 					break;
 				}
 				//decode Head
@@ -59,7 +66,6 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				toReadHead = false;
 			} else {
 				if(buffer.size() < currentRequest.getHead().getBodyLength()) {
-					System.out.println("body break");
 					break;
 				}
 				byte [] bytes = buffer.read(currentRequest.getHead().getBodyLength());
@@ -71,45 +77,19 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				}
 				
 				toReadHead = true;
+				
+				Response response = (Response) resultHandler.received(currentRequest);
 				ByteBuf outmsg = null;
 				
 				//Construct the response head
-				Head head = new Head();
-				head.setMagic(Head.MAGIC);
-				head.setInvokeId(currentRequest.getHead().getInvokeId());
+				Head head = response.getHead();
 				
-				ResponseBody body = new ResponseBody();
+				ResponseBody body = response.getBody();
 				
 				Result result = new RpcResult();
 				result.setStatus(ResultStatus.ERROR);
 				result.setValue("response:" + System.currentTimeMillis() + "---" + currentRequest.getBody().getInterfaceFullName() + "." + currentRequest.getBody().getMethodName() + "(" + Arrays.toString(currentRequest.getBody().getArguments()) + ")");
 				body.setReturnValue(result);
-				
-				/*Application application = Application.getApplication();
-				
-				Invoker invoker = application.getInovoker(currentRequest.getBody().getInterfaceFullName());
-				
-				
-				
-				if(invoker == null) {
-					Result result = new RpcResult();
-					result.setStatus(ResultStatus.ERROR);
-					body.setReturnValue(result);
-					System.out.println("-----NettyRequestCoder can't find the invoke :" + body);
-				} 
-				else {
-					Invocation invocation = new MethodInvocation();
-					invocation.setInterfaceFullName(currentRequest.getBody().getInterfaceFullName());
-					invocation.setMethodName(currentRequest.getBody().getMethodName());
-					invocation.setArguments(currentRequest.getBody().getArguments());
-					invocation.setParameterTypes(currentRequest.getBody().getParameterTypes());
-					
-					Result result = invoker.invoke(invocation);
-
-					//construct the response body
-					body.setReturnValue(result);
-					System.out.println("-----NettyRequestCoder find the invoke :" + body);
-				}*/
 				
 				byte[] bodyBytes = null;
 				try {
@@ -117,6 +97,7 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
+				
 				head.setBodyLength(bodyBytes.length);
 				
 				
@@ -140,6 +121,10 @@ public class NettyRequestCoder implements Decoder, Encoder {
 		byte [] head = Head.head2Bytes(request.getHead());
 		ctx.writeAndFlush(head);
 		return null;
+	}
+
+	public void setResultHandler(ResultHandler resultHandler) {
+		this.resultHandler = resultHandler;
 	}
 
 }
