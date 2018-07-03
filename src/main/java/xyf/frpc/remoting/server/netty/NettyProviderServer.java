@@ -25,7 +25,7 @@ public class NettyProviderServer implements ProviderServer {
 	
 	private ResultHandler resultHandler;
 	
-	private ChannelFuture nettyChannel;
+	private ChannelFuture nettyChannelFuture;
 	
 	private EventLoopGroup bossGroup;
 	private EventLoopGroup workerGroup;
@@ -43,7 +43,7 @@ public class NettyProviderServer implements ProviderServer {
 			.option(ChannelOption.SO_BACKLOG, 1024)
 			.childHandler(new ChildChannelHandler(resultHandler));
 			
-			nettyChannel = b.bind(port).sync();
+			nettyChannelFuture = b.bind(port).sync();
 			
 			logger.info("frpc:" + " server is listerning at " + port);
 			

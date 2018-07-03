@@ -7,6 +7,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import xyf.frpc.config.util.ExtensionLoader;
+import xyf.frpc.remoting.RpcException;
+import xyf.frpc.remoting.client.FrpcInvoker;
 import xyf.frpc.remoting.client.ReferenceClient;
 import xyf.frpc.remoting.data.Head;
 import xyf.frpc.remoting.data.Request;
@@ -110,12 +112,15 @@ public class FrpcProtocol implements Protocol {
 		return providerServer;
 	}
 
-	public <T> Invoker<T> refer(BindInfo bindInfo, Invoker<?> invoker) {
+	public <T> Invoker<T> refer(BindInfo bindInfo, Invoker<?> invoker) throws RpcException {
 		ReferenceClient referenceClient = (ReferenceClient) ExtensionLoader
 				.getExtensionLoader(ReferenceClient.class).getExtension("netty");
 		referenceClient.setResultHandler(clientResultHandler);
+		
 		referenceClient.connect(bindInfo.getIp(), bindInfo.getPort());
-		return null;
+		FrpcInvoker invokerRes = new FrpcInvoker(referenceClient, invoker.getInterface());
+		
+		return invokerRes;
 	}
 
 }

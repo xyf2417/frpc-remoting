@@ -7,13 +7,20 @@ import xyf.frpc.remoting.codec.Encoder;
 import xyf.frpc.remoting.data.Head;
 import xyf.frpc.remoting.data.Request;
 import xyf.frpc.remoting.data.Response;
+import xyf.frpc.remoting.handler.ResultHandler;
 
 public class NettyResponseCoder  implements Decoder, Encoder{
+	private ResultHandler resultHandler;
+
 	private NettyCodecByteBuf buffer = new NettyCodecByteBuf();
 	
 	private Response currentResponse;
 	
 	private boolean toReadHead = true;
+
+	public NettyResponseCoder(ResultHandler resultHandler) {
+		this.resultHandler = resultHandler;
+	}
 	
 	public Object decode(Object msg, Object out){
 		System.out.println("client decode 1");
