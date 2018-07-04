@@ -2,22 +2,21 @@ package xyf.frpc.remoting.data;
 
 import java.io.Serializable;
 
-public class RequestBody implements Serializable{
+public class RequestBody implements Serializable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 2946565368837555734L;
-	
+
 	private String interfaceFullName;
-	
+
 	private String methodName;
 
-
 	private Class[] parameterTypes;
-	
+
 	private Object[] arguments;
-	
+
 	public String getInterfaceFullName() {
 		return interfaceFullName;
 	}
@@ -33,8 +32,6 @@ public class RequestBody implements Serializable{
 	public void setMethodName(String methodName) {
 		this.methodName = methodName;
 	}
-
-	
 
 	public static long getSerialversionuid() {
 		return serialVersionUID;

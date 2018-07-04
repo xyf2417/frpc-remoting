@@ -3,32 +3,29 @@ package xyf.frpc.remoting.data;
 import xyf.frpc.remoting.codec.netty.ByteUtil;
 
 /**
- * +---------+--------------------------------------+-------------------+
- * |  magic  | flag|status|      invokeId           |     bodyLegth     |
- * |         |     |      |                         |                   |
- * +--------------------------------------------------------------------+
- * |         |     |      |                         |                   |
- * |   2     |  1  |  1   |           8             |         4         |
- * |         |     |      |                         |                   |
+ * +---------+--------------------------------------+-------------------+ |
+ * magic | flag|status| invokeId | bodyLegth | | | | | | |
+ * +--------------------------------------------------------------------+ | | |
+ * | | | | 2 | 1 | 1 | 8 | 4 | | | | | | |
  * +---------+-----+------+-------------------------+-------------------+
+ * 
  * @author xyf
- *
+ * 
  */
 public class Head {
 	public static final short MAGIC = 24256;
 	public static final int HEAD_LENGTH = 16;
-	
+
 	private short magic;
-	
+
 	private byte flag;
-	
+
 	private byte status;
-	
+
 	private long invokeId;
-	
+
 	private int bodyLength;
-	
-	
+
 	public short getMagic() {
 		return magic;
 	}
@@ -68,13 +65,14 @@ public class Head {
 	public void setBodyLength(int bodyLength) {
 		this.bodyLength = bodyLength;
 	}
-	
-	public static Head bytes2Head(byte [] bytes) {
-		if(bytes.length != HEAD_LENGTH){
-			throw new RuntimeException("The length of bytes array can't not resolve to a Head");
+
+	public static Head bytes2Head(byte[] bytes) {
+		if (bytes.length != HEAD_LENGTH) {
+			throw new RuntimeException(
+					"The length of bytes array can't not resolve to a Head");
 		}
 		Head head = new Head();
-		byte [] temp = new byte[2];
+		byte[] temp = new byte[2];
 		System.arraycopy(bytes, 0, temp, 0, 2);
 		head.setMagic(ByteUtil.bytes2short(temp));
 		head.setFlag(bytes[2]);
@@ -87,7 +85,7 @@ public class Head {
 		head.setBodyLength(ByteUtil.bytes2int(temp));
 		return head;
 	}
-	
+
 	public String toString() {
 		StringBuilder res = new StringBuilder();
 		res.append("Head(");
@@ -96,14 +94,16 @@ public class Head {
 		res.append(",bodyLength=" + bodyLength + ")");
 		return res.toString();
 	}
-	
-	public static byte [] head2Bytes(Head head) {
-		byte [] bytes = new byte[HEAD_LENGTH];
+
+	public static byte[] head2Bytes(Head head) {
+		byte[] bytes = new byte[HEAD_LENGTH];
 		System.arraycopy(ByteUtil.short2bytes(head.getMagic()), 0, bytes, 0, 2);
 		bytes[2] = head.getFlag();
 		bytes[3] = head.getStatus();
-		System.arraycopy(ByteUtil.long2bytes(head.getInvokeId()), 0, bytes, 4, 8);
-		System.arraycopy(ByteUtil.int2bytes(head.getBodyLength()), 0, bytes, 12, 4);
+		System.arraycopy(ByteUtil.long2bytes(head.getInvokeId()), 0, bytes, 4,
+				8);
+		System.arraycopy(ByteUtil.int2bytes(head.getBodyLength()), 0, bytes,
+				12, 4);
 		return bytes;
 	}
 }

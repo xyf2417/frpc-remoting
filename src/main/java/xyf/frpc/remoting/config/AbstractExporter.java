@@ -5,11 +5,11 @@ import xyf.frpc.rpc.Invoker;
 public class AbstractExporter<T> implements Exporter<T> {
 
 	private Invoker<T> invoker;
-	
+
 	public Invoker<T> getInvoker() {
 		return invoker;
 	}
-	
+
 	public void setInvoker(Invoker<T> invoker) {
 		this.invoker = invoker;
 	}

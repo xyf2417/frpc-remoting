@@ -14,16 +14,16 @@ import xyf.frpc.rpc.RpcResult;
 public class FrpcInvoker<T> implements Invoker<T> {
 
 	private final static Log logger = LogFactory.getLog(FrpcInvoker.class);
-	
+
 	private ReferenceClient referenceClient;
-	
+
 	private Class interfaceClass;
-	
+
 	public FrpcInvoker(ReferenceClient rc, Class<T> cInterface) {
 		this.referenceClient = rc;
 		this.interfaceClass = cInterface;
 	}
-	
+
 	public Class<T> getInterface() {
 		return interfaceClass;
 	}
@@ -37,12 +37,13 @@ public class FrpcInvoker<T> implements Invoker<T> {
 		Result result = new RpcResult();
 		try {
 			future = referenceClient.request(invocation);
+			Object resultValue = future.get();
 			result.setStatus(ResultStatus.NORMAL);
-			result.setValue(future);
+			result.setValue(resultValue);
 		} catch (RpcException e) {
 			result.setStatus(ResultStatus.ERROR);
 		}
-		
+
 		return result;
 	}
 

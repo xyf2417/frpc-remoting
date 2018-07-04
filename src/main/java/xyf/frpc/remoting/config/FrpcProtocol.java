@@ -19,6 +19,7 @@ import xyf.frpc.remoting.server.ProviderServer;
 import xyf.frpc.rpc.Invocation;
 import xyf.frpc.rpc.Invoker;
 import xyf.frpc.rpc.MethodInvocation;
+import xyf.frpc.rpc.ResponseFuture;
 import xyf.frpc.rpc.Result;
 import xyf.frpc.rpc.ResultStatus;
 import xyf.frpc.rpc.RpcResult;
@@ -77,14 +78,19 @@ public class FrpcProtocol implements Protocol {
 		}
 
 	};
-	
+
 	private ResultHandler clientResultHandler = new ResultHandler() {
 
 		public Object received(Object msg) {
+			Response response = (Response) msg;
 
+			long invokeId = response.getHead().getInvokeId();
+			ResponseFuture future = ResponseFuture.getFuture(invokeId);
+
+			future.setResult(response.getBody());
 			return null;
 		}
-		
+
 	};
 
 	public <T> Exporter<T> export(ExportInfo exportInfo, Invoker<?> invoker) {
@@ -112,14 +118,17 @@ public class FrpcProtocol implements Protocol {
 		return providerServer;
 	}
 
-	public <T> Invoker<T> refer(BindInfo bindInfo, Invoker<?> invoker) throws RpcException {
+	@SuppressWarnings("unchecked")
+	public <T> Invoker<T> refer(BindInfo bindInfo, Invoker<?> invoker)
+			throws RpcException {
 		ReferenceClient referenceClient = (ReferenceClient) ExtensionLoader
-				.getExtensionLoader(ReferenceClient.class).getExtension("netty");
+				.getExtensionLoader(ReferenceClient.class)
+				.getExtension("netty");
 		referenceClient.setResultHandler(clientResultHandler);
-		
+
 		referenceClient.connect(bindInfo.getIp(), bindInfo.getPort());
-		FrpcInvoker invokerRes = new FrpcInvoker(referenceClient, invoker.getInterface());
-		
+		FrpcInvoker invokerRes = new FrpcInvoker(referenceClient,
+				invoker.getInterface());
 		return invokerRes;
 	}
 
