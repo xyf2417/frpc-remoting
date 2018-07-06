@@ -42,7 +42,7 @@ public class FrpcProtocol implements Protocol {
 			Head head = new Head();
 			head.setMagic(Head.MAGIC);
 			head.setInvokeId(request.getHead().getInvokeId());
-
+			logger.info("frpc: provider received invoke with id=" + request.getHead().getInvokeId());
 			ResponseBody body = new ResponseBody();
 
 			if (invoker == null) {

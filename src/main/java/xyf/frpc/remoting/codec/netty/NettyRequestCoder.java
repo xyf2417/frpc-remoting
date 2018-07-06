@@ -78,6 +78,7 @@ public class NettyRequestCoder implements Decoder, Encoder {
 
 				Response response = (Response) resultHandler
 						.received(currentRequest);
+				
 				ByteBuf outmsg = null;
 
 				// Construct the response head
@@ -86,16 +87,9 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				ResponseBody body = response.getBody();
 
 				Result result = new RpcResult();
-				result.setStatus(ResultStatus.ERROR);
-				result.setValue("response:"
-						+ System.currentTimeMillis()
-						+ "---"
-						+ currentRequest.getBody().getInterfaceFullName()
-						+ "."
-						+ currentRequest.getBody().getMethodName()
-						+ "("
-						+ Arrays.toString(currentRequest.getBody()
-								.getArguments()) + ")");
+				result.setStatus(ResultStatus.NORMAL);
+				result.setValue(body.getReturnValue());
+				
 				body.setReturnValue(result);
 
 				byte[] bodyBytes = null;
