@@ -42,18 +42,18 @@ public class FrpcProtocol implements Protocol {
 			Head head = new Head();
 			head.setMagic(Head.MAGIC);
 			head.setInvokeId(request.getHead().getInvokeId());
-			logger.info("frpc: provider received invoke with id=" + request.getHead().getInvokeId());
+			logger.info("frpc: service received invoke with id=" + request.getHead().getInvokeId());
 			ResponseBody body = new ResponseBody();
 
 			if (invoker == null) {
 				Result result = new RpcResult();
 				result.setStatus(ResultStatus.ERROR);
-				result.setValue("Can't find the provider for interface "
+				result.setValue("Can't find the service for interface "
 						+ request.getBody().getInterfaceFullName());
 				body.setReturnValue(result);
 
 				if (logger.isErrorEnabled()) {
-					logger.error("frpc: Can't find the provider for interface "
+					logger.error("frpc: Can't find the service for interface "
 							+ request.getBody().getInterfaceFullName());
 				}
 			} else {

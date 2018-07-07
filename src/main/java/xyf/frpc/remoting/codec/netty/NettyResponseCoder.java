@@ -74,7 +74,6 @@ public class NettyResponseCoder implements Decoder, Encoder {
 							.toResponseBodyObject(bytes));
 					//System.out.println("client decode 11");
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 					//System.out.println("client decode 12");
 				}
