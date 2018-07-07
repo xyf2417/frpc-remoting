@@ -3,9 +3,9 @@ package xyf.frpc.remoting.codec.netty;
 import io.netty.channel.ChannelHandlerContext;
 import xyf.frpc.remoting.codec.Decoder;
 import xyf.frpc.remoting.codec.Encoder;
-import xyf.frpc.remoting.data.Head;
-import xyf.frpc.remoting.data.Request;
-import xyf.frpc.remoting.data.RequestBody;
+import xyf.frpc.rpc.data.Head;
+import xyf.frpc.rpc.data.Request;
+import xyf.frpc.rpc.data.RequestBody;
 
 public class NettyCoder implements Decoder, Encoder {
 

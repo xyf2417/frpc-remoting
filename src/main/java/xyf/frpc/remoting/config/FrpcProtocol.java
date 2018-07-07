@@ -10,10 +10,6 @@ import xyf.frpc.config.util.ExtensionLoader;
 import xyf.frpc.remoting.RpcException;
 import xyf.frpc.remoting.client.FrpcInvoker;
 import xyf.frpc.remoting.client.ReferenceClient;
-import xyf.frpc.remoting.data.Head;
-import xyf.frpc.remoting.data.Request;
-import xyf.frpc.remoting.data.Response;
-import xyf.frpc.remoting.data.ResponseBody;
 import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.remoting.server.ProviderServer;
 import xyf.frpc.rpc.Invocation;
@@ -23,6 +19,10 @@ import xyf.frpc.rpc.ResponseFuture;
 import xyf.frpc.rpc.Result;
 import xyf.frpc.rpc.ResultStatus;
 import xyf.frpc.rpc.RpcResult;
+import xyf.frpc.rpc.data.Head;
+import xyf.frpc.rpc.data.Request;
+import xyf.frpc.rpc.data.Response;
+import xyf.frpc.rpc.data.ResponseBody;
 
 public class FrpcProtocol implements Protocol {
 
@@ -86,8 +86,10 @@ public class FrpcProtocol implements Protocol {
 
 			long invokeId = response.getHead().getInvokeId();
 			ResponseFuture future = ResponseFuture.getFuture(invokeId);
-
-			future.setResult(response.getBody());
+			ResponseBody responseBody = response.getBody();
+			RpcResult rpcResult = (RpcResult) responseBody.getReturnValue();
+			Object methodReturn = rpcResult.getValue();
+			future.setResult(methodReturn);
 			return null;
 		}
 

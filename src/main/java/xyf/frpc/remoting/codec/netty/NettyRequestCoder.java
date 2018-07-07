@@ -5,18 +5,17 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import xyf.frpc.remoting.codec.Decoder;
 import xyf.frpc.remoting.codec.Encoder;
-import xyf.frpc.remoting.data.Head;
-import xyf.frpc.remoting.data.Request;
-import xyf.frpc.remoting.data.Response;
-import xyf.frpc.remoting.data.ResponseBody;
 import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.rpc.Result;
 import xyf.frpc.rpc.ResultStatus;
 import xyf.frpc.rpc.RpcResult;
+import xyf.frpc.rpc.data.Head;
+import xyf.frpc.rpc.data.Request;
+import xyf.frpc.rpc.data.Response;
+import xyf.frpc.rpc.data.ResponseBody;
 
 public class NettyRequestCoder implements Decoder, Encoder {
 
@@ -86,11 +85,11 @@ public class NettyRequestCoder implements Decoder, Encoder {
 
 				ResponseBody body = response.getBody();
 
-				Result result = new RpcResult();
+				/*Result result = new RpcResult();
 				result.setStatus(ResultStatus.NORMAL);
 				result.setValue(body.getReturnValue());
 				
-				body.setReturnValue(result);
+				body.setReturnValue(result);*/
 
 				byte[] bodyBytes = null;
 				try {

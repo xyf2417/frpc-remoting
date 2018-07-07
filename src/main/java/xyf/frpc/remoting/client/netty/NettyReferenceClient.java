@@ -20,12 +20,12 @@ import org.apache.commons.logging.LogFactory;
 import xyf.frpc.remoting.RpcException;
 import xyf.frpc.remoting.client.ReferenceClient;
 import xyf.frpc.remoting.codec.netty.JavaSerializableReqRespBodyPack;
-import xyf.frpc.remoting.data.Head;
-import xyf.frpc.remoting.data.RequestBody;
 import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.remoting.handler.netty.NettyClientHandler;
 import xyf.frpc.rpc.Invocation;
 import xyf.frpc.rpc.ResponseFuture;
+import xyf.frpc.rpc.data.Head;
+import xyf.frpc.rpc.data.RequestBody;
 
 public class NettyReferenceClient implements ReferenceClient {
 	private final static Log logger = LogFactory

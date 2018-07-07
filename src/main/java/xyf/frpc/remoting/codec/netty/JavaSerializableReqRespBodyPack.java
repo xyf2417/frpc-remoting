@@ -6,8 +6,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import xyf.frpc.remoting.data.RequestBody;
-import xyf.frpc.remoting.data.ResponseBody;
+import xyf.frpc.rpc.data.RequestBody;
+import xyf.frpc.rpc.data.ResponseBody;
 
 public class JavaSerializableReqRespBodyPack {
 
