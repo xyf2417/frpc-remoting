@@ -113,7 +113,7 @@ public class FrpcProtocol implements Protocol {
 	}
 
 	private ProviderServer createServer(int port) {
-		ProviderServer providerServer = (ProviderServer) ExtensionLoader
+		ProviderServer providerServer = ExtensionLoader
 				.getExtensionLoader(ProviderServer.class).getExtension("netty");
 		providerServer.setResultHandler(serverResultHandler);
 		providerServer.bind(port);
@@ -123,7 +123,7 @@ public class FrpcProtocol implements Protocol {
 	@SuppressWarnings("unchecked")
 	public <T> Invoker<T> refer(BindInfo bindInfo, Invoker<?> invoker)
 			throws RpcException {
-		ReferenceClient referenceClient = (ReferenceClient) ExtensionLoader
+		ReferenceClient referenceClient = ExtensionLoader
 				.getExtensionLoader(ReferenceClient.class)
 				.getExtension("netty");
 		referenceClient.setResultHandler(clientResultHandler);
