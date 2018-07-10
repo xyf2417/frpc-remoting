@@ -95,7 +95,7 @@ public class FrpcProtocol implements Protocol {
 
 	};
 
-	public <T> Exporter<T> export(ExportInfo exportInfo, Invoker<?> invoker) {
+	public <T> Exporter<T> export(ExportInfo exportInfo, Invoker<?> invoker) throws RpcException {
 		invokerMap.put(invoker.getInterface().getName(), invoker);
 
 		Exporter exporter = new FrpcExporter();
@@ -112,7 +112,7 @@ public class FrpcProtocol implements Protocol {
 		return exporter;
 	}
 
-	private ProviderServer createServer(int port) {
+	private ProviderServer createServer(int port) throws RpcException {
 		ProviderServer providerServer = ExtensionLoader
 				.getExtensionLoader(ProviderServer.class).getExtension("netty");
 		providerServer.setResultHandler(serverResultHandler);

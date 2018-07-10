@@ -12,6 +12,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import xyf.frpc.remoting.RpcException;
 import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.remoting.handler.netty.NettyServerHandler;
 import xyf.frpc.remoting.server.ProviderServer;
@@ -28,7 +29,7 @@ public class NettyProviderServer implements ProviderServer {
 	private EventLoopGroup bossGroup;
 	private EventLoopGroup workerGroup;
 
-	public void bind(int port) {
+	public void bind(int port) throws RpcException{
 
 		logger.info("frpc:" + " start server binding");
 		bossGroup = new NioEventLoopGroup();
@@ -45,9 +46,10 @@ public class NettyProviderServer implements ProviderServer {
 
 			logger.info("frpc:" + " server is listerning at " + port);
 
-		} catch (InterruptedException e) {
-			logger.info("frpc:" + " server interrupted, the nested reason is "
+		} catch (Exception e) {
+			logger.info("frpc:" + " server bind error "
 					+ e.getMessage());
+			throw new RpcException(e.getMessage());
 		} finally {
 			// no op
 		}

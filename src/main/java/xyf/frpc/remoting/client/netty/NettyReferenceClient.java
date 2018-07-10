@@ -55,6 +55,8 @@ public class NettyReferenceClient implements ReferenceClient {
 			nettyChannelFuture = b.connect(ip, port);
 			nettyChannel = nettyChannelFuture.channel();
 
+		} catch(Exception e) {
+			throw new RpcException(e.getMessage());
 		} finally {
 			// no op;
 		}
