@@ -13,8 +13,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import xyf.frpc.remoting.RpcException;
+import xyf.frpc.remoting.codec.netty.FrpcNettyServiceDecoder;
+import xyf.frpc.remoting.codec.netty.FrpcNettyServiceEncoder;
+import xyf.frpc.remoting.codec.netty.FrpcNettyServiceHandler;
 import xyf.frpc.remoting.handler.ResultHandler;
-import xyf.frpc.remoting.handler.netty.NettyServerHandler;
 import xyf.frpc.remoting.server.ProviderServer;
 
 public class NettyProviderServer implements ProviderServer {
@@ -72,6 +74,9 @@ class ChildChannelHandler extends ChannelInitializer<Channel> {
 
 	@Override
 	protected void initChannel(Channel ch) throws Exception {
-		ch.pipeline().addLast(new NettyServerHandler(resultHandler));
+		ch.pipeline().addLast(new FrpcNettyServiceDecoder());
+		ch.pipeline().addLast(new FrpcNettyServiceEncoder());
+		ch.pipeline().addLast(
+				new FrpcNettyServiceHandler(resultHandler));
 	}
 }

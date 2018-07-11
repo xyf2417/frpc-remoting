@@ -83,7 +83,6 @@ public class FrpcProtocol implements Protocol {
 
 		public Object received(Object msg) {
 			Response response = (Response) msg;
-
 			long invokeId = response.getHead().getInvokeId();
 			ResponseFuture future = ResponseFuture.getFuture(invokeId);
 			ResponseBody responseBody = response.getBody();

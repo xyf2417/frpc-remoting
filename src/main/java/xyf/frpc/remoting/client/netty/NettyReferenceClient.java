@@ -13,18 +13,23 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import xyf.frpc.remoting.RpcException;
 import xyf.frpc.remoting.client.ReferenceClient;
+import xyf.frpc.remoting.codec.netty.FrpcNettyReferenceDecoder;
+import xyf.frpc.remoting.codec.netty.FrpcNettyReferenceEncoder;
+import xyf.frpc.remoting.codec.netty.FrpcNettyReferenceHandler;
 import xyf.frpc.remoting.codec.netty.JavaSerializableReqRespBodyPack;
 import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.remoting.handler.netty.NettyClientHandler;
 import xyf.frpc.rpc.Invocation;
 import xyf.frpc.rpc.ResponseFuture;
 import xyf.frpc.rpc.data.Head;
+import xyf.frpc.rpc.data.Request;
 import xyf.frpc.rpc.data.RequestBody;
 
 public class NettyReferenceClient implements ReferenceClient {
@@ -48,11 +53,13 @@ public class NettyReferenceClient implements ReferenceClient {
 					.handler(new ChannelInitializer<Channel>() {
 						@Override
 						protected void initChannel(Channel ch) throws Exception {
+							ch.pipeline().addLast(new FrpcNettyReferenceDecoder());
+							ch.pipeline().addLast(new FrpcNettyReferenceEncoder());
 							ch.pipeline().addLast(
-									new NettyClientHandler(resultHandler));
+									new FrpcNettyReferenceHandler(resultHandler));
 						}
 					});
-			nettyChannelFuture = b.connect(ip, port);
+			nettyChannelFuture = b.connect(ip, port).sync();
 			nettyChannel = nettyChannelFuture.channel();
 
 		} catch(Exception e) {
@@ -85,23 +92,11 @@ public class NettyReferenceClient implements ReferenceClient {
 		body.setMethodName(invocation.getMethodName());
 		body.setParameterTypes(invocation.getParameterTypes());
 
-		byte[] bodyBytes = null;
-		try {
-			bodyBytes = JavaSerializableReqRespBodyPack.toArray(body);
-		} catch (IOException e) {
-			logger.error("frpc: serializable request error");
-		}
+		Request request = new Request();
+		request.setHead(head);
+		request.setBody(body);
 
-		head.setBodyLength(bodyBytes.length);
-
-		byte[] headBytes = Head.head2Bytes(head);
-
-		ByteBuf msg = Unpooled.buffer(headBytes.length + bodyBytes.length);
-
-		msg.writeBytes(headBytes);
-		msg.writeBytes(bodyBytes);
-
-		nettyChannel.writeAndFlush(msg);
+		nettyChannel.writeAndFlush(request);
 
 		return future;
 	}
