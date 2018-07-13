@@ -40,11 +40,11 @@ public class FrpcProtocol implements Protocol {
 			Invoker<?> invoker = invokerMap.get(request.getBody()
 					.getInterfaceFullName());
 			Head head = new Head();
-			head.setMagic(Head.MAGIC);
-			head.setInvokeId(request.getHead().getInvokeId());
-			logger.info("frpc: service received invoke with id=" + request.getHead().getInvokeId());
+			head.setMagic(Head.MAGIC_NUMBER);
+			long invokeId = request.getBody().getInvokeId();
+			logger.info("frpc: service received invoke with id=" + invokeId);
 			ResponseBody body = new ResponseBody();
-
+			body.setInvokeId(invokeId);
 			if (invoker == null) {
 				Result result = new RpcResult();
 				result.setStatus(ResultStatus.ERROR);
@@ -70,6 +70,7 @@ public class FrpcProtocol implements Protocol {
 
 				body.setReturnValue(result);
 			}
+			body.setEventType(ResponseBody.EventType.RPC);
 
 			Response response = new Response();
 			response.setHead(head);
@@ -83,7 +84,7 @@ public class FrpcProtocol implements Protocol {
 
 		public Object received(Object msg) {
 			Response response = (Response) msg;
-			long invokeId = response.getHead().getInvokeId();
+			long invokeId = response.getBody().getInvokeId();
 			ResponseFuture future = ResponseFuture.getFuture(invokeId);
 			ResponseBody responseBody = response.getBody();
 			RpcResult rpcResult = (RpcResult) responseBody.getReturnValue();
