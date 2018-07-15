@@ -81,7 +81,7 @@ public class NettyResponseCoder implements Decoder, Encoder {
 				toReadHead = true;
 				//System.out.println("client decode 14");
 				//System.out.println(currentResponse);
-				resultHandler.received(currentResponse);
+				resultHandler.received(currentResponse, null);
 			}
 		}
 		return null;

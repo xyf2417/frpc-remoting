@@ -1,5 +1,7 @@
 package xyf.frpc.remoting.config;
 
+import io.netty.channel.Channel;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -32,9 +34,9 @@ public class FrpcProtocol implements Protocol {
 
 	private Map<String, ProviderServer> serverMap = new ConcurrentHashMap<String, ProviderServer>();
 
-	private ResultHandler serverResultHandler = new ResultHandler() {
+	private ResultHandler serverResultHandler = new AbstractResultHandler() {
 
-		public Object received(Object msg) {
+		public Object received(Object msg, Channel nettyChannel) {
 
 			Request request = (Request) msg;
 			Invoker<?> invoker = invokerMap.get(request.getBody()
@@ -80,9 +82,9 @@ public class FrpcProtocol implements Protocol {
 
 	};
 
-	private ResultHandler clientResultHandler = new ResultHandler() {
+	private ResultHandler clientResultHandler = new AbstractResultHandler() {
 
-		public Object received(Object msg) {
+		public Object received(Object msg, Channel nettyChannel) {
 			Response response = (Response) msg;
 			long invokeId = response.getBody().getInvokeId();
 			ResponseFuture future = ResponseFuture.getFuture(invokeId);

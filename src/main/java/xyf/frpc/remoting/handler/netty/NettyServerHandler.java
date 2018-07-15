@@ -10,7 +10,7 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 	private ResultHandler resultHandler;
 
 	private NettyRequestCoder coder;
-
+	
 	public NettyServerHandler(ResultHandler resultHandler) {
 		this.resultHandler = resultHandler;
 		this.coder = new NettyRequestCoder(resultHandler);
@@ -31,5 +31,5 @@ public class NettyServerHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
 		ctx.close();
-	}
+	}	
 }

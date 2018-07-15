@@ -73,7 +73,7 @@ public class NettyRequestCoder implements Decoder, Encoder {
 				toReadHead = true;
 
 				Response response = (Response) resultHandler
-						.received(currentRequest);
+						.received(currentRequest, null);
 				
 				ByteBuf outmsg = null;
 
