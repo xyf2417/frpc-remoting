@@ -11,8 +11,6 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 
-import java.util.Collection;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -22,7 +20,6 @@ import org.apache.commons.logging.LogFactory;
 import xyf.frpc.remoting.Constants;
 import xyf.frpc.remoting.HeartBeatTask;
 import xyf.frpc.remoting.RpcChannel;
-import xyf.frpc.remoting.RpcException;
 import xyf.frpc.remoting.client.ReferenceClient;
 import xyf.frpc.remoting.codec.netty.FrpcNettyHeartBeatHandler;
 import xyf.frpc.remoting.codec.netty.FrpcNettyReferenceDecoder;
@@ -30,9 +27,9 @@ import xyf.frpc.remoting.codec.netty.FrpcNettyReferenceEncoder;
 import xyf.frpc.remoting.codec.netty.FrpcNettyReferenceHandler;
 import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.remoting.netty.NettyRpcChannel;
-import xyf.frpc.remoting.server.netty.NettyProviderServer;
 import xyf.frpc.rpc.Invocation;
 import xyf.frpc.rpc.ResponseFuture;
+import xyf.frpc.rpc.RpcException;
 import xyf.frpc.rpc.data.Head;
 import xyf.frpc.rpc.data.Request;
 import xyf.frpc.rpc.data.RequestBody;
@@ -79,7 +76,7 @@ public class NettyReferenceClient implements ReferenceClient {
 			nettyChannelFuture = b.connect(ip, port).sync();
 			nettyChannelFuture.addListener(new GenericFutureListener() {
 				public void operationComplete(Future future) throws Exception {
-					startHeartBeatTask();
+					//startHeartBeatTask();
 				}
 				
 			});
@@ -169,8 +166,13 @@ public class NettyReferenceClient implements ReferenceClient {
 		request.setHead(head);
 		request.setBody(body);
 
-		rpcChannel.getNettyChannel().writeAndFlush(request);
-
+		ChannelFuture f = rpcChannel.getNettyChannel().writeAndFlush(request);
+		try{
+			f.get();
+		}
+		catch(Throwable t) {
+			throw new RpcException(t.getMessage());
+		}
 		return future;
 	}
 }

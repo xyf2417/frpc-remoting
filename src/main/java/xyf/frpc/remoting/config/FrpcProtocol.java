@@ -9,7 +9,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import xyf.frpc.config.util.ExtensionLoader;
-import xyf.frpc.remoting.RpcException;
 import xyf.frpc.remoting.client.FrpcInvoker;
 import xyf.frpc.remoting.client.ReferenceClient;
 import xyf.frpc.remoting.handler.ResultHandler;
@@ -20,6 +19,7 @@ import xyf.frpc.rpc.MethodInvocation;
 import xyf.frpc.rpc.ResponseFuture;
 import xyf.frpc.rpc.Result;
 import xyf.frpc.rpc.ResultStatus;
+import xyf.frpc.rpc.RpcException;
 import xyf.frpc.rpc.RpcResult;
 import xyf.frpc.rpc.data.Head;
 import xyf.frpc.rpc.data.Request;
@@ -67,10 +67,21 @@ public class FrpcProtocol implements Protocol {
 				invocation.setArguments(request.getBody().getArguments());
 				invocation.setParameterTypes(request.getBody()
 						.getParameterTypes());
+				try {
+					Result result = invoker.invoke(invocation);
+					body.setReturnValue(result);
+				} catch (RpcException e) {
+					Result result = new RpcResult();
+					result.setStatus(ResultStatus.ERROR);
+					result.setValue("Invoke exception:" + e.getMessage());
+					body.setReturnValue(result);
 
-				Result result = invoker.invoke(invocation);
+					if (logger.isErrorEnabled()) {
+						logger.error("frpc: Invoke exception nested reason is " + e.getMessage());
+					}
+				}
 
-				body.setReturnValue(result);
+				
 			}
 			body.setEventType(ResponseBody.EventType.RPC);
 
@@ -97,7 +108,8 @@ public class FrpcProtocol implements Protocol {
 
 	};
 
-	public <T> Exporter<T> export(ExportInfo exportInfo, Invoker<?> invoker) throws RpcException {
+	public <T> Exporter<T> export(ExportInfo exportInfo, Invoker<?> invoker)
+			throws RpcException {
 		invokerMap.put(invoker.getInterface().getName(), invoker);
 
 		Exporter exporter = new FrpcExporter();
@@ -115,8 +127,8 @@ public class FrpcProtocol implements Protocol {
 	}
 
 	private ProviderServer createServer(int port) throws RpcException {
-		ProviderServer providerServer = ExtensionLoader
-				.getExtensionLoader(ProviderServer.class).getExtension("netty");
+		ProviderServer providerServer = ExtensionLoader.getExtensionLoader(
+				ProviderServer.class).getExtension("netty");
 		providerServer.setResultHandler(serverResultHandler);
 		providerServer.bind(port);
 		return providerServer;
@@ -125,9 +137,8 @@ public class FrpcProtocol implements Protocol {
 	@SuppressWarnings("unchecked")
 	public <T> Invoker<T> refer(BindInfo bindInfo, Invoker<?> invoker)
 			throws RpcException {
-		ReferenceClient referenceClient = ExtensionLoader
-				.getExtensionLoader(ReferenceClient.class)
-				.getExtension("netty");
+		ReferenceClient referenceClient = ExtensionLoader.getExtensionLoader(
+				ReferenceClient.class).getExtension("netty");
 		referenceClient.setResultHandler(clientResultHandler);
 
 		referenceClient.connect(bindInfo.getIp(), bindInfo.getPort());

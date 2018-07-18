@@ -1,9 +1,10 @@
 package xyf.frpc.remoting.codec.netty;
 
+import io.netty.channel.Channel;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import io.netty.channel.Channel;
 import xyf.frpc.remoting.Constants;
 import xyf.frpc.remoting.client.netty.NettyReferenceClient;
 import xyf.frpc.remoting.config.AbstractResultHandler;

@@ -1,7 +1,7 @@
 package xyf.frpc.remoting.server;
 
-import xyf.frpc.remoting.RpcException;
 import xyf.frpc.remoting.handler.ResultHandler;
+import xyf.frpc.rpc.RpcException;
 
 public interface ProviderServer {
 

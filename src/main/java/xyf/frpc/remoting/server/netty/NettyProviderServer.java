@@ -17,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -25,14 +24,13 @@ import org.apache.commons.logging.LogFactory;
 import xyf.frpc.remoting.Constants;
 import xyf.frpc.remoting.HeartBeatTask;
 import xyf.frpc.remoting.RpcChannel;
-import xyf.frpc.remoting.RpcException;
 import xyf.frpc.remoting.codec.netty.FrpcNettyHeartBeatHandler;
 import xyf.frpc.remoting.codec.netty.FrpcNettyServiceDecoder;
 import xyf.frpc.remoting.codec.netty.FrpcNettyServiceEncoder;
 import xyf.frpc.remoting.codec.netty.FrpcNettyServiceHandler;
 import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.remoting.server.ProviderServer;
-import xyf.frpc.rpc.Invoker;
+import xyf.frpc.rpc.RpcException;
 import xyf.frpc.rpc.data.Head;
 import xyf.frpc.rpc.data.Request;
 import xyf.frpc.rpc.data.RequestBody;
@@ -74,7 +72,7 @@ public class NettyProviderServer implements ProviderServer {
 			nettyChannelFuture = b.bind(port).sync();
 			nettyChannelFuture.addListener(new GenericFutureListener() {
 				public void operationComplete(Future future) throws Exception {
-					startHeartBeatTask();
+					//startHeartBeatTask();
 				}
 				
 			});

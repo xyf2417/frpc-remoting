@@ -1,9 +1,9 @@
 package xyf.frpc.remoting.client;
 
-import xyf.frpc.remoting.RpcException;
 import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.rpc.Invocation;
 import xyf.frpc.rpc.ResponseFuture;
+import xyf.frpc.rpc.RpcException;
 
 public interface ReferenceClient {
 

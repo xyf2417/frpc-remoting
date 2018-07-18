@@ -1,7 +1,7 @@
 package xyf.frpc.remoting.config;
 
-import xyf.frpc.remoting.RpcException;
 import xyf.frpc.rpc.Invoker;
+import xyf.frpc.rpc.RpcException;
 
 public interface Protocol {
 	public <T> Exporter<T> export(ExportInfo exportInfo, Invoker<?> invoker) throws RpcException;
