@@ -8,7 +8,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 import xyf.frpc.remoting.handler.ResultHandler;
-import xyf.frpc.rpc.data.Response;
 
 public class FrpcNettyReferenceHandler extends ChannelInboundHandlerAdapter {
 	private static final Log logger = LogFactory
@@ -21,8 +20,7 @@ public class FrpcNettyReferenceHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelRead(ChannelHandlerContext ctx, Object msg)
 			throws Exception {
-		Response response = (Response)msg;
-		resultHandler.received(response, ctx.channel());
+		resultHandler.received(msg, ctx.channel());
 	}
 	
 	

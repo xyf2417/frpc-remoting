@@ -43,6 +43,7 @@ public class FrpcProtocol implements Protocol {
 					.getInterfaceFullName());
 			Head head = new Head();
 			head.setMagic(Head.MAGIC_NUMBER);
+			head.setFlag(Head.RESPONSE_FLAG);
 			long invokeId = request.getBody().getInvokeId();
 			logger.info("frpc: service received invoke with id=" + invokeId);
 			ResponseBody body = new ResponseBody();
@@ -84,7 +85,7 @@ public class FrpcProtocol implements Protocol {
 				
 			}
 			body.setEventType(ResponseBody.EventType.RPC);
-
+			
 			Response response = new Response();
 			response.setHead(head);
 			response.setBody(body);

@@ -47,6 +47,7 @@ public class FrpcNettyHeartBeatHandler extends AbstractResultHandler {
 	private Object processHeartBeatRequest(Request request, Channel nettyChannel) {
 		Head head = new Head();
 		head.setMagic(Head.MAGIC_NUMBER);
+		head.setFlag(Head.RESPONSE_FLAG);
 		
 		ResponseBody body = new ResponseBody();
 		body.setEventType(ResponseBody.EventType.HEART_BEAT);
@@ -55,8 +56,13 @@ public class FrpcNettyHeartBeatHandler extends AbstractResultHandler {
 		response.setHead(head);
 		response.setBody(body);
 		
-		nettyChannel.writeAndFlush(response);
-		return null;
+		if(!isProvider()) {
+			nettyChannel.writeAndFlush(response);
+			return null;
+		}
+		else {
+			return response;
+		}
 	}
 	
 	private Object processHeartBeatResponse(Response response, Channel nettyChannel) {
@@ -64,13 +70,19 @@ public class FrpcNettyHeartBeatHandler extends AbstractResultHandler {
 			String key = getChannelKey(nettyChannel);
 			NettyProviderServer server = (NettyProviderServer) handler.getAttachment();
 			server.setChannelAttribute(key, Constants.HEART_BEAT_LAST_RECV_TIME_KEY, System.currentTimeMillis());
-			logger.info("frpc: server receive heart response from " + key);
+			logger.info("frpc: service receive heart response from " + key);
+			Head head = new Head();
+			head.setMagic(Head.MAGIC_NUMBER);
+			head.setFlag(Head.TRIVIAL_RESPONSE_FLAG);
+			Response trivialResponse = new Response();
+			trivialResponse.setHead(head);
+			return trivialResponse;
 		} else {
 			NettyReferenceClient client = (NettyReferenceClient) handler.getAttachment();
 			client.getChannel().addAttribute(Constants.HEART_BEAT_LAST_RECV_TIME_KEY, System.currentTimeMillis());
 			logger.info("frpc: reference receive heart beat response from " +  client.getChannel().getNettyChannel());
+			return null;
 		}
-		return null;
 	}
 	
 	private String getChannelKey(Channel nettyChannel) {

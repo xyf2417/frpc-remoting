@@ -24,9 +24,9 @@ import org.apache.commons.logging.LogFactory;
 import xyf.frpc.remoting.Constants;
 import xyf.frpc.remoting.HeartBeatTask;
 import xyf.frpc.remoting.RpcChannel;
+import xyf.frpc.remoting.codec.netty.FrpcNettyDecoder;
+import xyf.frpc.remoting.codec.netty.FrpcNettyEncoder;
 import xyf.frpc.remoting.codec.netty.FrpcNettyHeartBeatHandler;
-import xyf.frpc.remoting.codec.netty.FrpcNettyServiceDecoder;
-import xyf.frpc.remoting.codec.netty.FrpcNettyServiceEncoder;
 import xyf.frpc.remoting.codec.netty.FrpcNettyServiceHandler;
 import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.remoting.server.ProviderServer;
@@ -72,7 +72,7 @@ public class NettyProviderServer implements ProviderServer {
 			nettyChannelFuture = b.bind(port).sync();
 			nettyChannelFuture.addListener(new GenericFutureListener() {
 				public void operationComplete(Future future) throws Exception {
-					//startHeartBeatTask();
+					startHeartBeatTask();
 				}
 				
 			});
@@ -87,24 +87,26 @@ public class NettyProviderServer implements ProviderServer {
 	}
 
 	private void startHeartBeatTask() {
+		logger.info("frpc: service start heart beat task");
 		HeartBeatTask heartBeatTask = new HeartBeatTask() {
 			@Override
 			public void run() {
+				logger.info("frpc: service heart beat run");
 				Collection<RpcChannel> rpcChannels = NettyProviderServer.this.channels
 						.values();
 				for (RpcChannel rpcChannel : rpcChannels) {
 					long now = System.currentTimeMillis();
 					long lastRecvTime = (Long) rpcChannel
 							.getAttribute(Constants.HEART_BEAT_LAST_RECV_TIME_KEY);
-					if ((!((String) rpcChannel
-							.getAttribute(Constants.FIRST_HEART_BEAT_KEY))
-							.equals("true"))
-							&& ((now - lastRecvTime) > HeartBeatTask.DEFAULT_LOST_THRESHOLD)) {
-						channels.remove(getChannelKey(rpcChannel.getNettyChannel()));
-						rpcChannel.getNettyChannel().close();
-						logger.info("frpc: service lost connection with reference " + rpcChannel.getNettyChannel() +" bacause of heart timeout");
-					}
-					else {
+//					if ((!((String) rpcChannel
+//							.getAttribute(Constants.FIRST_HEART_BEAT_KEY))
+//							.equals("true"))
+//							&& ((now - lastRecvTime) > HeartBeatTask.DEFAULT_LOST_THRESHOLD)) {
+//						//channels.remove(getChannelKey(rpcChannel.getNettyChannel()));
+//						//rpcChannel.getNettyChannel().close();
+//						logger.info("frpc: service lost connection with reference " + rpcChannel.getNettyChannel() +" bacause of heart timeout");
+//					}
+//					else {
 						if(((String) rpcChannel
 							.getAttribute(Constants.FIRST_HEART_BEAT_KEY))
 							.equals("true")) {
@@ -112,6 +114,7 @@ public class NettyProviderServer implements ProviderServer {
 						}
 						Head head = new Head();
 						head.setMagic(Head.MAGIC_NUMBER);
+						head.setFlag(Head.REQUEST_FLAG);
 						
 						RequestBody body = new RequestBody();
 						body.setEventType(RequestBody.EventType.HEART_BEAT);
@@ -119,9 +122,9 @@ public class NettyProviderServer implements ProviderServer {
 						Request request = new Request();
 						request.setHead(head);
 						request.setBody(body);
-						logger.info("frpc: server send heart beat");
+						logger.info("frpc: service send heart beat - " + rpcChannel.getNettyChannel());
 						rpcChannel.getNettyChannel().writeAndFlush(request);
-					}
+				//	}
 				}//for
 			}//run
 		};
@@ -176,8 +179,8 @@ class ChildChannelHandler extends ChannelInitializer<Channel> {
 
 	@Override
 	protected void initChannel(Channel ch) throws Exception {
-		ch.pipeline().addLast(new FrpcNettyServiceDecoder());
-		ch.pipeline().addLast(new FrpcNettyServiceEncoder());
+		ch.pipeline().addLast(new FrpcNettyDecoder());
+		ch.pipeline().addLast(new FrpcNettyEncoder());
 		ch.pipeline().addLast(
 				new FrpcNettyServiceHandler(new FrpcNettyHeartBeatHandler(resultHandler)));
 	}

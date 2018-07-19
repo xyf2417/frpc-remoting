@@ -21,9 +21,9 @@ import xyf.frpc.remoting.Constants;
 import xyf.frpc.remoting.HeartBeatTask;
 import xyf.frpc.remoting.RpcChannel;
 import xyf.frpc.remoting.client.ReferenceClient;
+import xyf.frpc.remoting.codec.netty.FrpcNettyDecoder;
+import xyf.frpc.remoting.codec.netty.FrpcNettyEncoder;
 import xyf.frpc.remoting.codec.netty.FrpcNettyHeartBeatHandler;
-import xyf.frpc.remoting.codec.netty.FrpcNettyReferenceDecoder;
-import xyf.frpc.remoting.codec.netty.FrpcNettyReferenceEncoder;
 import xyf.frpc.remoting.codec.netty.FrpcNettyReferenceHandler;
 import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.remoting.netty.NettyRpcChannel;
@@ -64,9 +64,9 @@ public class NettyReferenceClient implements ReferenceClient {
 						@Override
 						protected void initChannel(Channel ch) throws Exception {
 							ch.pipeline().addLast(
-									new FrpcNettyReferenceDecoder());
+									new FrpcNettyDecoder());
 							ch.pipeline().addLast(
-									new FrpcNettyReferenceEncoder());
+									new FrpcNettyEncoder());
 							ch.pipeline()
 									.addLast(
 											new FrpcNettyReferenceHandler(
@@ -76,7 +76,7 @@ public class NettyReferenceClient implements ReferenceClient {
 			nettyChannelFuture = b.connect(ip, port).sync();
 			nettyChannelFuture.addListener(new GenericFutureListener() {
 				public void operationComplete(Future future) throws Exception {
-					//startHeartBeatTask();
+					startHeartBeatTask();
 				}
 				
 			});
@@ -99,15 +99,15 @@ public class NettyReferenceClient implements ReferenceClient {
 				long now = System.currentTimeMillis();
 				long lastRecvTime = (Long) rpcChannel
 						.getAttribute(Constants.HEART_BEAT_LAST_RECV_TIME_KEY);
-				if ((!((String) rpcChannel
-						.getAttribute(Constants.FIRST_HEART_BEAT_KEY))
-						.equals("true"))
-						&& ((now - lastRecvTime) > HeartBeatTask.DEFAULT_LOST_THRESHOLD)) {
-					rpcChannel.addAttribute(Constants.FIRST_HEART_BEAT_KEY, "false");
-					rpcChannel.getNettyChannel().close();
-					logger.info("frpc: reference lost connection with service bacause of heart timeout");
-				}
-				else {
+//				if ((!((String) rpcChannel
+//						.getAttribute(Constants.FIRST_HEART_BEAT_KEY))
+//						.equals("true"))
+//						&& ((now - lastRecvTime) > HeartBeatTask.DEFAULT_LOST_THRESHOLD)) {
+//					rpcChannel.addAttribute(Constants.FIRST_HEART_BEAT_KEY, "false");
+//					rpcChannel.getNettyChannel().close();
+//					logger.info("frpc: reference lost connection with service bacause of heart timeout");
+//				}
+//				else {
 					if(((String) rpcChannel
 							.getAttribute(Constants.FIRST_HEART_BEAT_KEY))
 							.equals("true")) {
@@ -115,6 +115,7 @@ public class NettyReferenceClient implements ReferenceClient {
 						}
 					Head head = new Head();
 					head.setMagic(Head.MAGIC_NUMBER);
+					head.setFlag(Head.REQUEST_FLAG);
 					
 					RequestBody body = new RequestBody();
 					body.setEventType(RequestBody.EventType.HEART_BEAT);
@@ -122,9 +123,9 @@ public class NettyReferenceClient implements ReferenceClient {
 					Request request = new Request();
 					request.setHead(head);
 					request.setBody(body);
-					logger.info("frpc: reference send heart beat");
+					logger.info("frpc: reference send heart beat - " + rpcChannel.getNettyChannel());
 					rpcChannel.getNettyChannel().writeAndFlush(request);
-				}
+				//}
 			}//run
 		};
 		scheduled.scheduleWithFixedDelay(heartBeatTask,
@@ -153,6 +154,7 @@ public class NettyReferenceClient implements ReferenceClient {
 
 		Head head = new Head();
 		head.setMagic(Head.MAGIC_NUMBER);
+		head.setFlag(Head.REQUEST_FLAG);
 
 		RequestBody body = new RequestBody();
 		body.setInvokeId(invokeId);
@@ -173,6 +175,7 @@ public class NettyReferenceClient implements ReferenceClient {
 		catch(Throwable t) {
 			throw new RpcException(t.getMessage());
 		}
+		
 		return future;
 	}
 }

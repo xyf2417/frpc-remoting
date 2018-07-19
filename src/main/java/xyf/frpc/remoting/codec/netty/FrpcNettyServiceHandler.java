@@ -11,6 +11,7 @@ import xyf.frpc.remoting.RpcChannel;
 import xyf.frpc.remoting.handler.ResultHandler;
 import xyf.frpc.remoting.netty.NettyRpcChannel;
 import xyf.frpc.remoting.server.netty.NettyProviderServer;
+import xyf.frpc.rpc.data.Head;
 import xyf.frpc.rpc.data.Response;
 
 public class FrpcNettyServiceHandler extends ChannelInboundHandlerAdapter {
@@ -29,7 +30,10 @@ public class FrpcNettyServiceHandler extends ChannelInboundHandlerAdapter {
 	public void channelRead(ChannelHandlerContext ctx, Object msg)
 			throws Exception {
 		Response response = (Response) resultHandler.received(msg, ctx.channel());
-		ctx.writeAndFlush(response);
+		Head head = response.getHead();
+		if(head.getFlag() != Head.TRIVIAL_RESPONSE_FLAG) {
+			ctx.writeAndFlush(response);
+		}
 	}
 	
 	@Override
