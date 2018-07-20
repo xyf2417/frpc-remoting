@@ -15,7 +15,7 @@ public class NettyRpcChannel implements RpcChannel {
 	//instance initialize
 	{
 		attributes.put(Constants.FIRST_HEART_BEAT_KEY, "true");
-		attributes.put(Constants.HEART_BEAT_LAST_RECV_TIME_KEY, 0L);
+		attributes.put(Constants.HEART_BEAT_LAST_RECV_TIME_KEY, System.currentTimeMillis());
 	}
 	public Channel nettyChannel;
 	

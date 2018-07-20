@@ -6,11 +6,11 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public abstract class HeartBeatTask implements Runnable {
 	
-	public static final long DEFAULT_HEART_BEAT_INTERVAL = 5000;
+	public static final long DEFAULT_HEART_BEAT_INTERVAL = 3000;
 	
 	public static final TimeUnit HEART_TIME_UNIT = TimeUnit.MILLISECONDS;
 	
-	public static final long DEFAULT_LOST_THRESHOLD = 60000;
+	public static final long DEFAULT_LOST_THRESHOLD = 5000;
 	
 	//in second
 	private long lostThreshold = DEFAULT_LOST_THRESHOLD;

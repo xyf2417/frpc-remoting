@@ -87,26 +87,24 @@ public class NettyProviderServer implements ProviderServer {
 	}
 
 	private void startHeartBeatTask() {
-		logger.info("frpc: service start heart beat task");
 		HeartBeatTask heartBeatTask = new HeartBeatTask() {
 			@Override
 			public void run() {
-				logger.info("frpc: service heart beat run");
 				Collection<RpcChannel> rpcChannels = NettyProviderServer.this.channels
 						.values();
 				for (RpcChannel rpcChannel : rpcChannels) {
 					long now = System.currentTimeMillis();
 					long lastRecvTime = (Long) rpcChannel
 							.getAttribute(Constants.HEART_BEAT_LAST_RECV_TIME_KEY);
-//					if ((!((String) rpcChannel
-//							.getAttribute(Constants.FIRST_HEART_BEAT_KEY))
-//							.equals("true"))
-//							&& ((now - lastRecvTime) > HeartBeatTask.DEFAULT_LOST_THRESHOLD)) {
-//						//channels.remove(getChannelKey(rpcChannel.getNettyChannel()));
-//						//rpcChannel.getNettyChannel().close();
-//						logger.info("frpc: service lost connection with reference " + rpcChannel.getNettyChannel() +" bacause of heart timeout");
-//					}
-//					else {
+					if ((!((String) rpcChannel
+							.getAttribute(Constants.FIRST_HEART_BEAT_KEY))
+							.equals("true"))
+							&& ((now - lastRecvTime) > HeartBeatTask.DEFAULT_LOST_THRESHOLD)) {
+						//channels.remove(getChannelKey(rpcChannel.getNettyChannel()));
+						//rpcChannel.getNettyChannel().close();
+						logger.info("frpc: service lost connection with reference " + rpcChannel.getNettyChannel() +" bacause of heart timeout");
+					}
+					else {
 						if(((String) rpcChannel
 							.getAttribute(Constants.FIRST_HEART_BEAT_KEY))
 							.equals("true")) {
@@ -122,9 +120,8 @@ public class NettyProviderServer implements ProviderServer {
 						Request request = new Request();
 						request.setHead(head);
 						request.setBody(body);
-						logger.info("frpc: service send heart beat - " + rpcChannel.getNettyChannel());
 						rpcChannel.getNettyChannel().writeAndFlush(request);
-				//	}
+					}
 				}//for
 			}//run
 		};
