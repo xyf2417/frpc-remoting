@@ -13,6 +13,8 @@ import io.netty.util.concurrent.GenericFutureListener;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,8 +44,7 @@ public class NettyReferenceClient implements ReferenceClient {
 	/**
 	 * scheduled for heartbeat
 	 */
-	ScheduledExecutorService scheduled = Executors.newScheduledThreadPool(1,
-			new HeartBeatTask.HeartBeatThreadFactory());
+	private static final ScheduledThreadPoolExecutor scheduled = new ScheduledThreadPoolExecutor(2,new HeartBeatTask.HeartBeatThreadFactory());
 
 	private ResultHandler resultHandler;
 
@@ -52,9 +53,22 @@ public class NettyReferenceClient implements ReferenceClient {
 	private RpcChannel rpcChannel;
 
 	private EventLoopGroup workerGroup;
+	
+	private String ip;
+	
+	private int port;
+	
+	private boolean firstConnect = true;
+	
+	private ScheduledFuture heartBeatTimer; 
 
 	@SuppressWarnings("unchecked")
 	public void connect(String ip, int port) throws RpcException {
+		if(firstConnect) {
+			this.ip = ip;
+			this.port = port;
+			firstConnect = false;
+		}
 		workerGroup = new NioEventLoopGroup();
 		try {
 			Bootstrap b = new Bootstrap();
@@ -88,7 +102,6 @@ public class NettyReferenceClient implements ReferenceClient {
 		} finally {
 			// no op;
 		}
-
 	}
 	
 	private void startHeartBeatTask() {
@@ -103,7 +116,12 @@ public class NettyReferenceClient implements ReferenceClient {
 						.equals("true"))
 						&& ((now - lastRecvTime) > HeartBeatTask.DEFAULT_LOST_THRESHOLD)) {
 					rpcChannel.addAttribute(Constants.FIRST_HEART_BEAT_KEY, "false");
-					rpcChannel.getNettyChannel().close();
+					try {
+						reConnect();
+					} catch (RpcException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					logger.info("frpc: reference lost connection with service bacause of heart timeout");
 				}
 				else {
@@ -126,10 +144,38 @@ public class NettyReferenceClient implements ReferenceClient {
 				}
 			}//run
 		};
-		scheduled.scheduleWithFixedDelay(heartBeatTask,
+		heartBeatTimer = scheduled.scheduleWithFixedDelay(heartBeatTask,
 				HeartBeatTask.DEFAULT_HEART_BEAT_INTERVAL,
 				HeartBeatTask.DEFAULT_HEART_BEAT_INTERVAL,
 				HeartBeatTask.HEART_TIME_UNIT);
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void disConnect() {
+		stopHeartBeat();
+		workerGroup.shutdownGracefully();
+		rpcChannel.getNettyChannel().close();
+		workerGroup = null;
+		rpcChannel = null;
+	}
+	
+	private void reConnect() throws RpcException {
+		disConnect();
+		connect(ip, port);
+	}
+	
+	private void stopHeartBeat() {
+		 if (heartBeatTimer != null && !heartBeatTimer.isCancelled()) {
+	            try {
+	            	heartBeatTimer.cancel(true);
+	                scheduled.purge();
+	            } catch (Throwable e) {
+	                if (logger.isWarnEnabled()) {
+	                    logger.warn(e.getMessage(), e);
+	                }
+	            }
+	        }
+		 heartBeatTimer = null;
 	}
 	
 	public RpcChannel getChannel() {
